@@ -1,20 +1,20 @@
-# Searching And Filtering Using JPA Specification
+# Pesquisando e filtrando usando a especificação JPA
 
-### Introduction
+### Introdução
 
 ![Spring Boot Data JPA Specification](images/spring-boot-data-jpa-specification.png)
 
-Spring data JPA provides many ways to deal with entities including query methods and custom JPQL queries. However, sometimes we need a more programmatic approach: for example Criteria API or QueryDSL.
+O Spring data JPA fornece muitas maneiras de lidar com entidades, incluindo métodos de consulta e consultas JPQL customizadas. No entanto, às vezes precisamos de uma abordagem mais programática: por exemplo, Criteria API ou QueryDSL.
 
-Spring Data JPA Specification provides a convenient and sophisticated manner to build dynamic SQL where clauses. By adding some extra logic and considering some pitfalls, we are capable of offering API consumers a zero-effort generic mechanism for filtering entities.
+A Especificação Spring Data JPA fornece uma maneira conveniente e sofisticada de construir cláusulas where de SQL dinâmico. Adicionando alguma lógica extra e considerando algumas armadilhas, somos capazes de oferecer aos consumidores de API um mecanismo genérico de esforço zero para filtrar entidades.
 
-Specification are built on top of the Criteria API to simplify the developer experience. When building a Criteria query we are required to build and manage `Root`, `Criteria Query` and `Criteria Builder` object by ourselves.
+As especificações são construídas sobre a Criteria API para simplificar a experiência do desenvolvedor. Ao construir uma consulta Criteria, somos obrigados a construir e gerenciar objetos `Root`, `Criteria Query` e `Criteria Builder` por nós mesmos.
 
-### Project Setup and Dependency
+### Configuração e dependência do projeto
 
-I'm depending [Spring Initializr](https://start.spring.io/) for this as it is much easier.
+Dependência [Spring Initializr](https://start.spring.io/).
 
-We need `spring-boot-starter-data-jpa`, `spring-boot-starter-web`, `lombok` and `h2database`. There is my `pom.xml`.
+Adicionar `spring-boot-starter-data-jpa`, `spring-boot-starter-web`, `lombok` e `h2database`. No `pom.xml`.
 
 ```xml
 <dependency>
@@ -42,7 +42,7 @@ We need `spring-boot-starter-data-jpa`, `spring-boot-starter-web`, `lombok` and 
 </dependency>
 ```
 
-Add configuration `application.properties` file like following below.
+Adicione o arquivo `application.properties` de configuração conforme abaixo.
 
 ```sh
 server.port=8080
@@ -59,13 +59,13 @@ spring.jpa.show-sql=true
 spring.jpa.hibernate.ddl-auto=update
 ```
 
-### Implementation
+### Implementação
 
-For the sake of simplicity, in the samples, we'll implement the same query in multiple ways: finding operating system by the name, the name containing String, release date between date, and kernel version in a values.
+Para simplificar, nos exemplos, implementaremos a mesma consulta de várias maneiras: localizando o sistema operacional pelo nome, o nome contendo String, data de lançamento entre data e versão do kernel em valores.
 
-#### Designing Table
+#### Table
 
-In this case, I will use table `operating_system` to simulate data to be develope.
+Neste caso, utilizarei a tabela `operating_system` para simular os dados a serem desenvolvidos.
 
 | Field | Type |
 |---|---|
@@ -78,7 +78,7 @@ In this case, I will use table `operating_system` to simulate data to be develop
 
 #### Domain Data Access Object (DAO)
 
-Create `OperatingSystem` for Entity like below.
+Criar `OperatingSystem` para Entidade como abaixo.
 
 ```java
 @Data
@@ -113,11 +113,11 @@ public class OperatingSystem implements Serializable {
 }
 ```
 
-#### Filter Using Specification
+#### Filtrar Usando Especificação
 
 **Enumeration of Field Type**
 
-Let's define enum of field type which is can be used to parse into data type. So, we can parse value into `BOOLEAN`, `CHAR`, `DATE`, `DOUBLE`, `INTEGER`, `LONG`, and `STRING`.
+Vamos definir enum do tipo de campo que pode ser usado para analisar o tipo de dados. Então, podemos analisar o valor em `BOOLEAN`, `CHAR`, `DATE`, `DOUBLE`, `INTEGER`, `LONG`, and `STRING`.
 
 ```java
 @Slf4j
@@ -178,9 +178,9 @@ public enum FieldType {
 }
 ```
 
-**Filter Request**
+**Solicitação de filtro**
 
-A data contract for filter request there should be a `key`, `operator`, `value` and `fieldType`.
+Um contrato de dados para solicitação de filtro deve ter um `key`, `operator`, `value` and `fieldType`.
 
 ```java
 @Data
@@ -208,9 +208,9 @@ public class FilterRequest implements Serializable {
 }
 ```
 
-**Enumeration of Operator**
+**Enumeração do Operador**
 
-This is a logical for predicate of Criteria API likes `EQUAL`, `NOT_EQUAL`, `LIKE`, `IN`, and `BETWEEN`.
+Lógica para o predicate do Criteria API likes `EQUAL`, `NOT_EQUAL`, `LIKE`, `IN`, and `BETWEEN`.
 
 ```java
 @Slf4j
@@ -278,7 +278,7 @@ public enum Operator {
 }
 ```
 
-If I mapping the operator translated to be a sql query like table below.
+Se eu mapear o operador traduzido para ser uma consulta sql como a tabela abaixo.
 
 | Operator | SQL Query |
 |---|---|
@@ -288,9 +288,9 @@ If I mapping the operator translated to be a sql query like table below.
 | IN | `SELECT * FROM table WHERE field IN (?)` |
 | BETWEEN | `SELECT * FROM table WHERE field >= ? AND field <= ?` |
 
-**Enumeration of Sorting Direction**
+**Enumeração de Sorting Direction**
 
-This is used when we need to sort result query. It can be ascending or descending direction.
+Isso é usado quando precisamos classificar a consulta de resultado. Pode ser sentido ascendente ou descendente.
 
 ```java
 public enum SortDirection {
@@ -311,7 +311,7 @@ public enum SortDirection {
 }
 ```
 
-If I mapping the sort direction translated to be a sql query like table below.
+Se eu mapear a direção de classificação traduzida para ser uma consulta SQL como a tabela abaixo.
 
 | Direction | SQL Query |
 |---|---|
@@ -320,7 +320,7 @@ If I mapping the sort direction translated to be a sql query like table below.
 
 **Sort Request**
 
-A data contract for sorting request there should be a `key` and `direction`.
+Um contrato de dados para solicitação de classificação deve conter uma `key` e `direction`.
 
 ```java
 @Data
@@ -342,7 +342,7 @@ public class SortRequest implements Serializable {
 
 **Search Request**
 
-This is a main request that be used from REST API.
+Esta é uma solicitação principal que deve ser usada na REST API.
 
 ```java
 @Data
@@ -378,7 +378,7 @@ public class SearchRequest implements Serializable {
 
 **Generic Class Search Specification**
 
-Last, we will create generic class that implements the Specification interface and going to pass in our own constraint to construct actual query.
+Por último, criaremos uma classe genérica que implementa a interface Specification e passaremos em nossa própria restrição para construir a consulta real.
 
 ```java
 @Slf4j
@@ -414,11 +414,11 @@ public class SearchSpecification<T> implements Specification<T> {
 }
 ```
 
-#### Using Search Specification
+#### Usando Especificação de Pesquisa
 
 **Repository**
 
-Next, take create repository and extending the `JPASpecificationExecutor` to get the new Specification APIs.
+Em seguida, crie o repositório e estenda o `JPASpecificationExecutor` para obter as novas APIs de especificação.
 
 ```java
 @Repository
@@ -469,11 +469,11 @@ public class OperatingSystemController {
 
 #### Test Search Sepecification
 
-Run spring boot application using comman `mvn spring-boot: run` and open `http://localhost:8080/api/h2-console`
+Iniciar a aplicação -> `mvn spring-boot: run` e abrir no navegador `http://localhost:8080/api/h2-console`
 
 ![H2 Console](images/h2-console-login.png)
 
-Execute this query to `h2-console`.
+Execute esta consulta para `h2-console`.
 
 ```sql
 INSERT INTO operating_system (id, name, version, kernel, release_date, usages) VALUES (1, 'Arch Linux', '2022.03.01', '5.16.11', {ts '2022-03-01 00:10:00.69'}, 80);
@@ -489,8 +489,6 @@ INSERT INTO operating_system (id, name, version, kernel, release_date, usages) V
 ```
 
 ![Insert Data to H2](images/h2-console-insert.png)
-
-Open `Postman` or `Thunder Client` or etc to test our API search operating system with request like below.
 
 **Without Filter and Sorting**
 
@@ -655,13 +653,13 @@ Filter usages
 }
 ```
 
-### Conclusion
+### Conclusão
 
-JPA Specifications provide us with a way to write reusable queries and also fluent APIs with which we can combine and build more sophisticated queries.
+As especificações JPA nos fornecem uma maneira de escrever consultas reutilizáveis e também APIs fluentes com as quais podemos combinar e criar consultas mais sofisticadas.
 
-The problem of searching and filtering is trivial to all modern day applications and the Spring Data JPA Specification provides a neat and elegant way to create dynamic queries. Please share your thoughts and suggestions on how you would like to solve the problem of searching and filtering.
+O problema de pesquisa e filtragem é trivial para todos os aplicativos modernos e a Especificação Spring Data JPA fornece uma maneira simples e elegante de criar consultas dinâmicas. Por favor, compartilhe seus pensamentos e sugestões sobre como você gostaria de resolver o problema de busca e filtragem.
 
-Spring data JPA repository abstraction allows executing predicates via JPA Criteria API predicates wrapped into a Specification object. To enable this functionality you simply let your repository extend `JpaSpecificationExecutor`.
+A abstração do repositório JPA de dados Spring permite a execução de predicados por meio de predicados de API de critérios JPA agrupados em um objeto de especificação. Para habilitar essa funcionalidade, basta deixar seu repositório estender `JpaSpecificationExecutor`.
 
 
 ### Reference
