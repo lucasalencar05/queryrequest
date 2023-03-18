@@ -663,9 +663,6 @@ The problem of searching and filtering is trivial to all modern day applications
 
 Spring data JPA repository abstraction allows executing predicates via JPA Criteria API predicates wrapped into a Specification object. To enable this functionality you simply let your repository extend `JpaSpecificationExecutor`.
 
-### Clone on Github
-
-**[piinalpin/springboot-jpa-specification](https://github.com/piinalpin/springboot-jpa-specification.git)**
 
 ### Reference
 
