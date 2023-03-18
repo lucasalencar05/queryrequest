@@ -1,4 +1,4 @@
-# Pesquisando e filtrando usando a especificação JPA
+# Pesquisando e filtrando usando o JPA Specification
 
 ### Introdução
 
